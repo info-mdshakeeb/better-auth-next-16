@@ -5,12 +5,10 @@ import { nextCookies } from "better-auth/next-js";
 
 import { components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
-import { query } from "./_generated/server";
 
 const siteUrl = process.env.SITE_URL!;
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
-
 export const createAuth = (
   ctx: GenericCtx<DataModel>,
   { optionsOnly } = { optionsOnly: false },
@@ -26,18 +24,15 @@ export const createAuth = (
       enabled: true,
       requireEmailVerification: false,
     },
+    session: {
+      cookieCache: {
+        enabled: true,
+        maxAge: 60, // 1 minute
+      }
+    },
     plugins: [
       convex(),
       nextCookies()
     ],
   });
 };
-
-// Example function for getting the current user
-// Feel free to edit, omit, etc.
-export const getCurrentUser = query({
-  args: {},
-  handler: async (ctx) => {
-    return authComponent.getAuthUser(ctx);
-  },
-});
