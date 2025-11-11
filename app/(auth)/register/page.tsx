@@ -1,9 +1,13 @@
 import { FieldDescription } from "@/components/ui/field";
-import { RegisterForm } from "@/features/auth/register/register.form";
+import { RegisterForm } from "@/features/auth/forms/register.form";
 import { GalleryVerticalEnd } from "lucide-react";
 import Link from "next/link";
 
-export default function RegisterPage() {
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
+export default async function page(props: { searchParams: SearchParams }) {
+  const { callback } = (await props.searchParams) || {};
+
   return (
     <div className="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="w-full max-w-sm flex flex-col gap-4">
@@ -19,12 +23,13 @@ export default function RegisterPage() {
           </Link>
           <h1 className="text-xl font-bold">Create your account</h1>
           <FieldDescription>
-            Already have an account? <Link href="/login">Log in</Link>
+            Already have an account?{" "}
+            <Link href={`/login?callback=${callback}`}>Log in</Link>
           </FieldDescription>
         </div>
 
         {/* //! FORM */}
-        <RegisterForm />
+        <RegisterForm callback={callback as string} />
 
         <FieldDescription className="px-6 text-center">
           By creating an account, you agree to our{" "}

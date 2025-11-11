@@ -21,6 +21,7 @@ export const createAuth = (
     database: authComponent.adapter(ctx),
 
     emailAndPassword: {
+      autoSignIn: true,
       enabled: true,
       requireEmailVerification: false,
     },

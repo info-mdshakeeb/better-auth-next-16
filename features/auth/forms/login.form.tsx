@@ -2,7 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MailIcon } from "lucide-react";
+import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import z from "zod";
 
 import { PasswordInput } from "@/components/forms/password-input";
@@ -22,9 +24,6 @@ import {
 } from "@/components/ui/input-group";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { toast } from "sonner";
 
 const loginFormSchema = z.object({
   email: z
@@ -38,8 +37,13 @@ const loginFormSchema = z.object({
 });
 type ILoginFormValues = z.infer<typeof loginFormSchema>;
 
-export function LoginForm({ className }: { className?: string }) {
-  const router = useRouter();
+export function LoginForm({
+  className,
+  callback,
+}: {
+  className?: string;
+  callback?: string;
+}) {
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<ILoginFormValues>({
@@ -58,7 +62,7 @@ export function LoginForm({ className }: { className?: string }) {
       await authClient.signIn.email(
         {
           ...data,
-          callbackURL: "/",
+          callbackURL: callback ?? "/",
         },
         {
           onError: ({ error }) => {
@@ -70,7 +74,6 @@ export function LoginForm({ className }: { className?: string }) {
             toast.success("Login successful!", {
               id: "login",
             });
-            router.push("/");
           },
         }
       );

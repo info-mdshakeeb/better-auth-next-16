@@ -1,9 +1,13 @@
 import { FieldDescription } from "@/components/ui/field";
-import { LoginForm } from "@/features/auth/login/login.form";
+import { LoginForm } from "@/features/auth/forms/login.form";
 import { GalleryVerticalEnd } from "lucide-react";
 import Link from "next/link";
 
-export default function LoginPage() {
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
+export default async function page(props: { searchParams: SearchParams }) {
+  const { callback } = (await props.searchParams) || {};
+
   return (
     <div className="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="w-full max-w-sm flex flex-col gap-4">
@@ -19,12 +23,13 @@ export default function LoginPage() {
           </Link>
           <h1 className="text-xl font-bold">Welcome to Acme Inc.</h1>
           <FieldDescription>
-            Don&apos;t have an account? <Link href="/register">Register</Link>
+            Don&apos;t have an account?{" "}
+            <Link href={`/register?callback=${callback}`}>Register</Link>
           </FieldDescription>
         </div>
 
         {/* //! FORM */}
-        <LoginForm />
+        <LoginForm callback={callback as string} />
 
         <FieldDescription className="px-6 text-center">
           By clicking continue, you agree to our{" "}

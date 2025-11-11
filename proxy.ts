@@ -2,25 +2,38 @@ import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 
 const signInRoutes = ["/login", "/register", "/verify-2fa", "/reset-password"];
+const publicRoutes = ["/"];
 
-// Just check cookie, recommended approach
 export default async function middleware(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
+  const pathname = request.nextUrl.pathname;
+  const referer = request.headers.get("referer") || "";
 
-  const isSignInRoute = signInRoutes.includes(request.nextUrl.pathname);
+  // 1️⃣ Allow public routes
+  if (publicRoutes.includes(pathname)) {
+    return NextResponse.next();
+  }
 
+  const isSignInRoute = signInRoutes.includes(pathname);
+
+  // 2️⃣ If visiting sign-in routes without session → allow
   if (isSignInRoute && !sessionCookie) {
     return NextResponse.next();
   }
 
+  // 3️⃣ If visiting protected route without session → redirect to login
   if (!isSignInRoute && !sessionCookie) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    // Preserve destination so user returns after successful login
+    const callback = encodeURIComponent(pathname + request.nextUrl.search);
+    return NextResponse.redirect(new URL(`/login?callback=${callback}`, request.url));
   }
 
-  if (isSignInRoute && sessionCookie) {
+  // 4️⃣ If visiting sign-in route *with* session → redirect to dashboard
+  if (isSignInRoute && sessionCookie && !referer.includes("/dashboard")) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
+  // 5️⃣ Otherwise → allow (authenticated user visiting normal route)
   return NextResponse.next();
 }
 
